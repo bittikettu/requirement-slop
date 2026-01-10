@@ -363,32 +363,32 @@ select:focus {
 }
 
 .asciidoc-rendered-view {
-  background: white;
-  color: #333;
+  background: var(--bg-color);
+  color: var(--text-color);
   padding: 3rem;
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
   overflow-y: auto;
   max-height: 800px;
   line-height: 1.6;
 }
 
 .asciidoc-rendered-view h1 {
-  color: #222;
-  border-bottom: 2px solid #eee;
+  color: #fff;
+  border-bottom: 2px solid var(--border-color);
   padding-bottom: 0.5rem;
   margin-top: 0;
 }
 
 .asciidoc-rendered-view h2 {
-  color: #333;
-  border-bottom: 1px solid #eee;
+  color: #fff;
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 0.3rem;
   margin-top: 2rem;
 }
 
 .asciidoc-rendered-view h3 {
-  color: #444;
+  color: #fff;
   margin-top: 1.5rem;
 }
 
@@ -408,19 +408,19 @@ select:focus {
 
 .asciidoc-rendered-view .hdlist-label {
   font-weight: bold;
-  color: #666;
+  color: #8b949e;
   width: 150px;
   padding-right: 1rem;
 }
 
 .asciidoc-rendered-view hr {
   border: 0;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-color);
   margin: 2rem 0;
 }
 
 .asciidoc-rendered-view a {
-  color: #0066cc;
+  color: var(--accent-color);
 }
 
 .asciidoc-rendered-view ul {
