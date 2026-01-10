@@ -33,6 +33,7 @@ def generate_asciidoc(db: Session, status_filter: str = None, priority_filter: s
         
     output = []
     output.append("= Requirements Document")
+    output.append(":doctype: book")
     output.append(":toc:")
     output.append("")
 
@@ -55,14 +56,14 @@ def generate_asciidoc(db: Session, status_filter: str = None, priority_filter: s
         
         # Attributes
         output.append("[horizontal]")
-        output.append(f"Description:: {r.description or 'N/A'}")
-        output.append(f"Rationale:: {r.rationale or 'N/A'}")
-        output.append(f"Priority:: {r.priority}")
-        output.append(f"Status:: {r.status}")
+        output.append(f"Description::\n{r.description or 'N/A'}")
+        output.append(f"Rationale::\n{r.rationale or 'N/A'}")
+        output.append(f"Priority::\n{r.priority}")
+        output.append(f"Status::\n{r.status}")
         
         # Traces
         if r.outgoing_traces:
-            output.append("Traces to::")
+            output.append("Traces to::\n")
             links = []
             for t in r.outgoing_traces:
                 links.append(f"<<{t.target_id}>>")

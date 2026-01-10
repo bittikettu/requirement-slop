@@ -182,7 +182,7 @@ export default function RequirementDetail() {
                     {isEditing ? (
                         <textarea rows={4} value={editForm.description || ""} onChange={e => setEditForm({...editForm, description: e.target.value})} />
                     ) : (
-                        <div className="field-value">{req.description || "No description"}</div>
+                        <pre className="field-value pre-text">{req.description || "No description"}</pre>
                     )}
                 </div>
 
@@ -191,7 +191,7 @@ export default function RequirementDetail() {
                     {isEditing ? (
                         <textarea rows={2} value={editForm.rationale || ""} onChange={e => setEditForm({...editForm, rationale: e.target.value})} />
                     ) : (
-                        <div className="field-value">{req.rationale || "No rationale"}</div>
+                        <pre className="field-value pre-text">{req.rationale || "No rationale"}</pre>
                     )}
                 </div>
                 
