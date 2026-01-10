@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createRequirement, getProjects } from '../api';
-import type { Requirement, Project } from '../api';
-import { Save } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { createRequirement, getProjects, verifyEARS } from '../api';
+import type { Requirement, Project, EARSResponse } from '../api';
+import { Save, CheckCircle, AlertCircle } from 'lucide-react';
 
 export default function RequirementForm() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [form, setForm] = useState<Partial<Requirement>>({
         id: "",
         title: "",
@@ -19,10 +20,37 @@ export default function RequirementForm() {
     const [projects, setProjects] = useState<Project[]>([]);
     const [selectedProject, setSelectedProject] = useState<string>(""); 
     const [error, setError] = useState("");
+    const [earsResult, setEarsResult] = useState<EARSResponse | null>(null);
 
     useEffect(() => {
-        getProjects().then(setProjects).catch(console.error);
-    }, []);
+        getProjects().then(data => {
+            setProjects(data);
+            const params = new URLSearchParams(location.search);
+            const pId = params.get('project_id');
+            if (pId) {
+                setSelectedProject(pId);
+                setForm(prev => ({ ...prev, id: "Auto-generated" }));
+            }
+        }).catch(console.error);
+    }, [location.search]);
+
+    useEffect(() => {
+        const title = form.title;
+        const timer = setTimeout(async () => {
+            if (!title) {
+                setEarsResult(null);
+                return;
+            }
+            try {
+                const res = await verifyEARS(title);
+                setEarsResult(res);
+            } catch (err) {
+                console.error("EARS verify failed", err);
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [form.title]);
 
     const handleSave = async () => {
         if(!form.title) {
@@ -92,6 +120,21 @@ export default function RequirementForm() {
                 <div className="field-group">
                     <label className="field-label">Title</label>
                     <input value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
+                    {form.title && (
+                        <div style={{marginTop:'0.5rem', fontSize:'0.85rem', display:'flex', alignItems:'center', gap:'0.4rem'}}>
+                            {earsResult?.is_compliant ? (
+                                <>
+                                    <CheckCircle size={14} color="#3fb950" />
+                                    <span style={{color:'#3fb950'}}>EARS Compliant ({earsResult.pattern})</span>
+                                </>
+                            ) : (
+                                <>
+                                    <AlertCircle size={14} color="#db6d28" />
+                                    <span style={{color:'#db6d28'}}>{earsResult?.hint || "Checking EARS..."}</span>
+                                </>
+                            )}
+                        </div>
+                    )}
                </div>
 
                <div className="field-group">

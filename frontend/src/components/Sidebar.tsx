@@ -1,80 +1,166 @@
-import { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
-import { Plus, Boxes, FileText, RefreshCw } from 'lucide-react';
-import { getRequirements } from '../api';
-import type { Requirement } from '../api';
+import { useState, useEffect, useMemo } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { Plus, Boxes, FileText, RefreshCw, ChevronRight, ChevronDown } from 'lucide-react';
+import { getRequirements, getProjects } from '../api';
+import type { Requirement, Project } from '../api';
+
+interface TreeItemProps {
+    req: Requirement;
+    allReqs: Requirement[];
+    expanded: Set<string>;
+    toggleExpanded: (id: string) => void;
+}
+
+function TreeItem({ req, allReqs, expanded, toggleExpanded }: TreeItemProps) {
+    const children = useMemo(() => allReqs.filter(r => r.parent_id === req.id), [allReqs, req.id]);
+    const isExpanded = expanded.has(req.id);
+    const hasChildren = children.length > 0;
+
+    return (
+        <div className="tree-node">
+            <div className="tree-row">
+                {hasChildren ? (
+                    <button className="toggle-btn" onClick={() => toggleExpanded(req.id)}>
+                        {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                    </button>
+                ) : (
+                    <div style={{ width: 14 }}></div>
+                )}
+                <NavLink 
+                    to={`/requirements/${req.id}`}
+                    className={({isActive}) => `req-link ${isActive ? 'active' : ''}`}
+                >
+                    <span className="req-id">{req.id}</span>
+                    <span className="req-title">{req.title}</span>
+                </NavLink>
+            </div>
+            {hasChildren && isExpanded && (
+                <div className="tree-children">
+                    {children.map(child => (
+                        <TreeItem 
+                            key={child.id} 
+                            req={child} 
+                            allReqs={allReqs} 
+                            expanded={expanded} 
+                            toggleExpanded={toggleExpanded} 
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function Sidebar() {
-  const [reqs, setReqs] = useState<Requirement[]>([]);
+    const navigate = useNavigate();
+    const [reqs, setReqs] = useState<Requirement[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [expanded, setExpanded] = useState<Set<string>>(new Set());
+    const [projectExpanded, setProjectExpanded] = useState<Set<number>>(new Set());
 
-  useEffect(() => {
-    const loadReqs = async () => {
+    const loadData = async () => {
         try {
-          const data = await getRequirements();
-          setReqs(data);
+            const [rData, pData] = await Promise.all([getRequirements(), getProjects()]);
+            setReqs(rData);
+            setProjects(pData);
         } catch (e) {
             console.error(e);
         }
     };
-    loadReqs();
-    // Poll or event bus would be better, but simple interval for refreshing list
-    const interval = setInterval(loadReqs, 5000); 
-    return () => clearInterval(interval);
-  }, []);
-  
-  // Also expose manual reload if needed, but for now button can just re-trigger or we extract function
-  const manualReload = async () => {
-      try {
-        const data = await getRequirements();
-        setReqs(data);
-      } catch (e) {
-          console.error(e);
-      }
-  };
 
-  return (
-    <div className="sidebar">
-      <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'1rem'}}>
-          <h2 style={{margin:0, fontSize:'1.2rem'}}>ReqTool</h2>
-          <button className="btn" onClick={manualReload} style={{padding:'4px'}}><RefreshCw size={14}/></button>
-      </div>
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const [rData, pData] = await Promise.all([getRequirements(), getProjects()]);
+                setReqs(rData);
+                setProjects(pData);
+            } catch (e) {
+                console.error(e);
+            }
+        };
 
-      <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
-          <NavLink to="/requirements/new" className="btn btn-primary" style={{flex:1, justifyContent:'center'}}>
-              <Plus size={16} /> New
-          </NavLink>
-      </div>
-      
-       <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem'}}>
-          <NavLink to="/traceability" className="btn" style={{flex:1, justifyContent:'center'}}>
-              <Boxes size={16} /> Trace
-          </NavLink>
-            <NavLink to="/export" className="btn" style={{flex:1, justifyContent:'center'}}>
-              <FileText size={16} /> Doc
-          </NavLink>
-      </div>
+        loadData();
+        const interval = setInterval(loadData, 5000);
+        return () => clearInterval(interval);
+    }, []);
 
-      <div style={{marginBottom:'1rem'}}>
-          <NavLink to="/projects" className="btn" style={{display:'flex', justifyContent:'center', width:'100%'}}>
-             <RefreshCw size={16} style={{marginRight: '6px'}}/> Projects
-          </NavLink>
-      </div>
+    const toggleExpanded = (id: string) => {
+        const newExpanded = new Set(expanded);
+        if (newExpanded.has(id)) newExpanded.delete(id);
+        else newExpanded.add(id);
+        setExpanded(newExpanded);
+    };
 
-      <div className="req-list">
-          {reqs.map(r => (
-              <NavLink 
-                key={r.id} 
-                to={`/requirements/${r.id}`}
-                className={({isActive}) => `req-item ${isActive ? 'active' : ''}`}
-                style={{display:'block'}}
-              >
-                  <div style={{fontWeight:600}}>{r.id}</div>
-                  <div style={{fontSize:'0.85em', color:'#8b949e', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>
-                      {r.title}
-                  </div>
-              </NavLink>
-          ))}
-      </div>
-    </div>
-  );
+    const toggleProject = (id: number) => {
+        const newExpanded = new Set(projectExpanded);
+        if (newExpanded.has(id)) newExpanded.delete(id);
+        else newExpanded.add(id);
+        setProjectExpanded(newExpanded);
+    };
+
+    return (
+        <div className="sidebar">
+            <div className="sidebar-header">
+                <h2 style={{ margin: 0, fontSize: '1.2rem' }}>ReqTool</h2>
+                <button className="btn btn-icon" onClick={loadData}><RefreshCw size={14} /></button>
+            </div>
+
+            <div className="sidebar-actions">
+                <NavLink to="/requirements/new" className="btn btn-primary main-new-btn">
+                    <Plus size={16} /> New
+                </NavLink>
+            </div>
+
+            <nav className="nav-secondary">
+                <NavLink to="/traceability" className="nav-btn"><Boxes size={16} /> Trace</NavLink>
+                <NavLink to="/export" className="nav-btn"><FileText size={16} /> Doc</NavLink>
+                <NavLink to="/projects" className="nav-btn"><RefreshCw size={16} /> Projects</NavLink>
+            </nav>
+
+            <div className="sidebar-content">
+                {projects.map(p => {
+                    const projectReqs = reqs.filter(r => r.project_id === p.id);
+                    const rootReqs = projectReqs.filter(r => !r.parent_id);
+                    const isExpanded = projectExpanded.has(p.id);
+
+                    return (
+                        <div key={p.id} className="project-group">
+                            <div className="project-header">
+                                <button className="toggle-btn" onClick={() => toggleProject(p.id)}>
+                                    {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                </button>
+                                <span className="project-name" onClick={() => toggleProject(p.id)}>{p.name}</span>
+                                <button 
+                                    className="add-btn" 
+                                    title="Add requirement to project"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/requirements/new?project_id=${p.id}`);
+                                    }}
+                                >
+                                    <Plus size={12} />
+                                </button>
+                            </div>
+                            {isExpanded && (
+                                <div className="project-children">
+                                    {rootReqs.map(r => (
+                                        <TreeItem 
+                                            key={r.id} 
+                                            req={r} 
+                                            allReqs={projectReqs} 
+                                            expanded={expanded} 
+                                            toggleExpanded={toggleExpanded} 
+                                        />
+                                    ))}
+                                    {projectReqs.length === 0 && (
+                                        <div className="empty-msg">No requirements</div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
 }

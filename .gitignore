@@ -1,0 +1,10 @@
+# Byte-compiled / optimized / DLL files
+backend/__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+backend/venv
+
+# Database
+reqtool.db

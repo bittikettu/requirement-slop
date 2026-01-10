@@ -97,3 +97,14 @@ export const getReqIFExport = async () => {
     const response = await api.get("/export/reqif", { responseType: 'text' });
     return response.data; 
 };
+
+export interface EARSResponse {
+    is_compliant: boolean;
+    pattern?: string;
+    hint?: string;
+}
+
+export const verifyEARS = async (title: string): Promise<EARSResponse> => {
+    const response = await api.post<EARSResponse>("/requirements/verify-ears", { title });
+    return response.data;
+};

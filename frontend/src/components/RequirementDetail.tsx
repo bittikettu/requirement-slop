@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getRequirement, updateRequirement, deleteRequirement, createTrace, deleteTrace } from '../api';
-import type { RequirementDetail as ReqDetailType } from '../api'
-import { Trash2, Edit3, Save, X, Link as LinkIcon, AlertTriangle } from 'lucide-react';
+import { getRequirement, updateRequirement, deleteRequirement, createTrace, deleteTrace, verifyEARS } from '../api';
+import type { RequirementDetail as ReqDetailType, EARSResponse } from '../api'
+import { Trash2, Edit3, Save, X, Link as LinkIcon, AlertTriangle, CheckCircle, AlertCircle } from 'lucide-react';
 
 export default function RequirementDetail() {
     const { id } = useParams();
@@ -12,6 +12,7 @@ export default function RequirementDetail() {
     const [editForm, setEditForm] = useState<Partial<ReqDetailType>>({});
     const [linkTarget, setLinkTarget] = useState("");
     const [error, setError] = useState("");
+    const [earsResult, setEarsResult] = useState<EARSResponse | null>(null);
 
     const load = useCallback(async () => {
         if(!id) return;
@@ -21,6 +22,10 @@ export default function RequirementDetail() {
             setEditForm(data);
             setIsEditing(false);
             setError("");
+            
+            // Verify EARS
+            const ears = await verifyEARS(data.title);
+            setEarsResult(ears);
         } catch (err: unknown) {
             // @ts-expect-error: Axios error type handling needs refinement
             setError(err.response?.data?.detail || "Failed to load");
@@ -37,7 +42,7 @@ export default function RequirementDetail() {
             await updateRequirement(id, editForm);
             load();
         } catch (err: unknown) {
-            // @ts-ignore
+            // @ts-expect-error: Axios error type handling needs refinement
             setError(err.response?.data?.detail || "Failed to update");
         }
     }
@@ -49,7 +54,7 @@ export default function RequirementDetail() {
             await deleteRequirement(id);
             navigate("/");
         } catch (err: unknown) {
-            // @ts-ignore
+            // @ts-expect-error: Axios error type handling needs refinement
             setError(err.response?.data?.detail || "Failed to delete");
         }
     }
@@ -61,7 +66,7 @@ export default function RequirementDetail() {
             setLinkTarget("");
             load();
         } catch (err: unknown) {
-             // @ts-ignore
+             // @ts-expect-error: Axios error type handling needs refinement
              setError(err.response?.data?.detail || "Failed to link");
         }
     }
@@ -76,7 +81,7 @@ export default function RequirementDetail() {
             await deleteTrace(s, t);
             load();
         } catch (err: unknown) {
-            // @ts-ignore
+            // @ts-expect-error: Axios error type handling needs refinement
             setError(err.response?.data?.detail || "Failed to unlink");
         }
     }
@@ -102,7 +107,22 @@ export default function RequirementDetail() {
                         <h1 style={{margin:0}}>{req.id}: {req.title}</h1>
                     )}
                     
-                    <div style={{display:'flex', gap:'0.5rem'}}>
+                    <div style={{display:'flex', gap:'0.5rem', alignItems:'center'}}>
+                        {earsResult && (
+                             <div style={{fontSize:'0.85rem', display:'flex', alignItems:'center', gap:'0.4rem', marginRight:'1rem', padding:'0.3rem 0.6rem', background:'var(--bg-secondary)', borderRadius:'4px'}}>
+                                {earsResult.is_compliant ? (
+                                    <>
+                                        <CheckCircle size={14} color="#3fb950" />
+                                        <span style={{color:'#3fb950'}}>EARS ({earsResult.pattern})</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <AlertCircle size={14} color="#db6d28" />
+                                        <span style={{color:'#db6d28'}}>Non-EARS</span>
+                                    </>
+                                )}
+                            </div>
+                        )}
                         {isEditing ? (
                             <>
                                 <button className="btn btn-primary" onClick={handleSave}><Save size={16}/> Save</button>
