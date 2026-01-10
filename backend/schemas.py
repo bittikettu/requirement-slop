@@ -72,3 +72,11 @@ class RequirementDetail(RequirementOut):
     outgoing_traces: List[TraceOut] = []
     incoming_traces: List[TraceOut] = []
     children: List[RequirementOut] = []
+
+class EARSVerificationRequest(BaseModel):
+    title: str
+
+class EARSVerificationResponse(BaseModel):
+    is_compliant: bool
+    pattern: Optional[str] = None
+    hint: Optional[str] = None

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from .. import models, schemas, database
+from ..scripts.ears_verifier import verify_ears
 from datetime import datetime
 
 router = APIRouter(
@@ -13,6 +14,30 @@ router = APIRouter(
 @router.get("/matrix", response_model=List[schemas.RequirementDetail])
 def get_traceability_matrix(db: Session = Depends(database.get_db)):
     return db.query(models.Requirement).all()
+
+@router.post("/verify-ears", response_model=schemas.EARSVerificationResponse)
+def verify_req_ears(req: schemas.EARSVerificationRequest):
+    compliant, pattern, params = verify_ears(req.title)
+    
+    hint = None
+    if not compliant:
+        hint = "Try following an EARS pattern, e.g., 'The <system> shall <action>'"
+    else:
+        # Map pattern to a more friendly name
+        friendly_names = {
+            "ubiquitous": "Ubiquitous",
+            "event_driven": "Event-driven",
+            "state_driven": "State-driven",
+            "unwanted_behavior": "Unwanted behavior",
+            "optional_feature": "Optional feature"
+        }
+        pattern = friendly_names.get(pattern, pattern)
+
+    return schemas.EARSVerificationResponse(
+        is_compliant=compliant,
+        pattern=pattern,
+        hint=hint
+    )
 
 @router.post("/", response_model=schemas.RequirementOut)
 def create_requirement(req: schemas.RequirementCreate, db: Session = Depends(database.get_db)):
