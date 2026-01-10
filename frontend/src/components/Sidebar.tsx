@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Plus, Boxes, FileText, RefreshCw, ChevronRight, ChevronDown } from 'lucide-react';
+import { Plus, Boxes, FileText, RefreshCw, ChevronRight, ChevronDown, History } from 'lucide-react';
 import { getRequirements, getProjects } from '../api';
 import type { Requirement, Project } from '../api';
 
@@ -115,6 +115,7 @@ export default function Sidebar() {
                 <NavLink to="/traceability" className="nav-btn"><Boxes size={16} /> Trace</NavLink>
                 <NavLink to="/export" className="nav-btn"><FileText size={16} /> Doc</NavLink>
                 <NavLink to="/projects" className="nav-btn"><RefreshCw size={16} /> Projects</NavLink>
+                <NavLink to="/history" className="nav-btn"><History size={16} /> History</NavLink>
             </nav>
 
             <div className="sidebar-content">

@@ -108,3 +108,22 @@ export const verifyEARS = async (title: string): Promise<EARSResponse> => {
     const response = await api.post<EARSResponse>("/requirements/verify-ears", { title });
     return response.data;
 };
+
+export interface AuditLog {
+    id: number;
+    req_id?: string;
+    timestamp: string;
+    author: string;
+    action: string;
+    details: string;
+}
+
+export const getAuditLogs = async (skip: number = 0, limit: number = 100) => {
+    const response = await api.get<AuditLog[]>(`/audit?skip=${skip}&limit=${limit}`);
+    return response.data;
+};
+
+export const getAuditLogsForRequirement = async (reqId: string) => {
+    const response = await api.get<AuditLog[]>(`/audit/requirements/${reqId}`);
+    return response.data;
+};

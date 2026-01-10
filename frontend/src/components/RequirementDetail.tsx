@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getRequirement, updateRequirement, deleteRequirement, createTrace, deleteTrace, verifyEARS } from '../api';
-import type { RequirementDetail as ReqDetailType, EARSResponse } from '../api'
-import { Trash2, Edit3, Save, X, Link as LinkIcon, AlertTriangle, CheckCircle, AlertCircle } from 'lucide-react';
+import { getRequirement, updateRequirement, deleteRequirement, createTrace, deleteTrace, verifyEARS, getAuditLogsForRequirement } from '../api';
+import type { RequirementDetail as ReqDetailType, EARSResponse, AuditLog } from '../api'
+import { Trash2, Edit3, Save, X, Link as LinkIcon, AlertTriangle, CheckCircle, AlertCircle, Clock, User } from 'lucide-react';
+import { format } from 'date-fns';
 
 export default function RequirementDetail() {
     const { id } = useParams();
@@ -14,13 +15,18 @@ export default function RequirementDetail() {
     const [error, setError] = useState("");
     const [earsResult, setEarsResult] = useState<EARSResponse | null>(null);
     const [editEarsResult, setEditEarsResult] = useState<EARSResponse | null>(null);
+    const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
 
     const load = useCallback(async () => {
         if(!id) return;
         try {
-            const data = await getRequirement(id);
+            const [data, logs] = await Promise.all([
+                getRequirement(id),
+                getAuditLogsForRequirement(id)
+            ]);
             setReq(data);
             setEditForm(data);
+            setAuditLogs(logs);
             setIsEditing(false);
             setError("");
             
@@ -264,6 +270,48 @@ export default function RequirementDetail() {
                             </span>
                         ))}
                     </div>
+                </div>
+
+                <hr style={{borderColor:'var(--border-color)', margin:'2rem 0'}}/>
+                
+                <div style={{display:'flex', alignItems:'center', gap:'0.5rem', marginBottom:'1.5rem'}}>
+                    <Clock size={20} color="var(--accent-color)" />
+                    <h3 style={{margin:0}}>Change History</h3>
+                </div>
+
+                <div className="audit-timeline-mini">
+                    {auditLogs.length === 0 && <div className="empty-msg">No history recorded yet.</div>}
+                    {auditLogs.map(log => (
+                        <div key={log.id} style={{
+                            padding: '0.75rem',
+                            borderLeft: '2px solid var(--border-color)',
+                            marginLeft: '10px',
+                            position: 'relative',
+                            marginBottom: '0.5rem'
+                        }}>
+                             <div style={{
+                                width: '10px',
+                                height: '10px',
+                                background: 'var(--accent-color)',
+                                borderRadius: '50%',
+                                position: 'absolute',
+                                left: '-6px',
+                                top: '12px'
+                            }}></div>
+                            <div style={{display:'flex', justifyContent:'space-between', fontSize:'0.85rem', marginBottom:'0.25rem'}}>
+                                <span style={{fontWeight:600}}>{log.action}</span>
+                                <span style={{color:'#8b949e'}}>
+                                    {format(new Date(log.timestamp), 'yyyy-MM-dd HH:mm')}
+                                </span>
+                            </div>
+                            <div style={{fontSize: '0.85rem', color:'#8b949e', display:'flex', alignItems:'center', gap: '4px', marginBottom:'0.4rem'}}>
+                                <User size={12} /> {log.author}
+                            </div>
+                            <div style={{fontSize:'0.85rem', background:'rgba(255,255,255,0.03)', padding:'0.5rem', borderRadius:'4px', color: '#c9d1d9', whiteSpace: 'pre-wrap'}}>
+                                {log.details}
+                            </div>
+                        </div>
+                    ))}
                 </div>
 
             </div>

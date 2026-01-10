@@ -5,6 +5,7 @@ import RequirementForm from './components/RequirementForm';
 import ExportView from './components/ExportView';
 import TraceabilityMatrix from './components/TraceabilityMatrix';
 import ProjectList from './components/ProjectList';
+import HistoryView from './components/HistoryView';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/export" element={<ExportView />} />
           <Route path="/traceability" element={<TraceabilityMatrix />} />
           <Route path="/projects" element={<ProjectList />} />
+          <Route path="/history" element={<HistoryView />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

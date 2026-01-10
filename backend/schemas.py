@@ -80,3 +80,13 @@ class EARSVerificationResponse(BaseModel):
     is_compliant: bool
     pattern: Optional[str] = None
     hint: Optional[str] = None
+
+class AuditLogOut(BaseModel):
+    id: int
+    req_id: Optional[str] = None
+    timestamp: datetime
+    author: str
+    action: str
+    details: str
+
+    model_config = ConfigDict(from_attributes=True)
