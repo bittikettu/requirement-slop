@@ -1,5 +1,7 @@
 # ReqTool
 
+![ReqTool Screenshot](screenshot.png)
+
 A lightweight and powerful requirement management tool designed for modern engineering workflows.
 
 ## Features
