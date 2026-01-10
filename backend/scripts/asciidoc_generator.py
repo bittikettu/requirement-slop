@@ -1,8 +1,9 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from .. import models
 
 def generate_asciidoc(db: Session, status_filter: str = None, priority_filter: str = None):
-    query = db.query(models.Requirement)
+    # Eager load project to avoid N+1 and ensure we have project names
+    query = db.query(models.Requirement).options(joinedload(models.Requirement.project))
     
     if status_filter:
         query = query.filter(models.Requirement.status == status_filter)
@@ -12,25 +13,7 @@ def generate_asciidoc(db: Session, status_filter: str = None, priority_filter: s
     reqs = query.all()
     req_map = {r.id: r for r in reqs}
     
-    # helper to find level
-    def get_level(r):
-        level = 1
-        current = r
-        # limit depth to avoid infinite loop if cyclic (though UI prevents it)
-        depth = 0
-        while current.parent_id and current.parent_id in req_map and depth < 10:
-            current = req_map[current.parent_id]
-            level += 1
-            depth += 1
-        return level
-
-    # Sort checks: maybe sort by ID or Title
-    # For hierarchy, we want to print parents before children usually, OR
-    # AsciiDoc structure depends on `==` vs `===`.
-    # If we just dump them in order with correct `=` header depth, AsciiDoc handles the nesting visually.
-    
-    # We need to sort by hierarchy order
-    # Build a tree
+    # Build tree structure
     children_map = {}
     roots = []
     
@@ -41,6 +24,13 @@ def generate_asciidoc(db: Session, status_filter: str = None, priority_filter: s
         else:
             roots.append(r)
             
+    # Group roots by project
+    projects_map = {} # project_name -> [roots]
+    
+    for r in roots:
+        p_name = r.project.name if r.project else "Unassigned"
+        projects_map.setdefault(p_name, []).append(r)
+        
     output = []
     output.append("= Requirements Document")
     output.append(":toc:")
@@ -48,16 +38,21 @@ def generate_asciidoc(db: Session, status_filter: str = None, priority_filter: s
 
     def visit(r, level):
         # Header
-        # Level 1 = ==
-        # Level 2 = ===
-        header_marker = "=" * (level + 1)
+        # Base level for projects is == (Level 1)
+        # So Req Level 1 = === (Level 2)
+        # Req Level N = === + N
+        
+        # level passed in starts at 1
+        # If project is == (depth 1), then first req is === (depth 2)
+        # So header length = level + 2
+        
+        header_marker = "=" * (level + 2)
         
         # Add anchor and header
         output.append(f"[[{r.id}]]")
         output.append(f"{header_marker} {r.id}: {r.title}")
         output.append("")
         
-        # Attributes
         # Attributes
         output.append("[horizontal]")
         output.append(f"Description:: {r.description or 'N/A'}")
@@ -67,13 +62,11 @@ def generate_asciidoc(db: Session, status_filter: str = None, priority_filter: s
         
         # Traces
         if r.outgoing_traces:
-            output.append("*Traces to:*")
+            output.append("Traces to::")
             links = []
             for t in r.outgoing_traces:
                 links.append(f"<<{t.target_id}>>")
             output.append(", ".join(links))
-        
-        # Incoming? "Referenced by" (Skipped unless requested, keep consistent with previous logic)
         
         output.append("")
         
@@ -82,7 +75,19 @@ def generate_asciidoc(db: Session, status_filter: str = None, priority_filter: s
             for child in children_map[r.id]:
                 visit(child, level + 1)
 
-    for root in roots:
-        visit(root, 1)
+    # Sort projects and keys
+    sorted_project_names = sorted(projects_map.keys())
+    
+    for p_name in sorted_project_names:
+        project_roots = projects_map[p_name]
+        
+        # Project Header
+        output.append(f"== {p_name}")
+        output.append("")
+        
+        # Visit roots
+        # Roots are level 1 requirements relative to the project
+        for root in project_roots:
+            visit(root, 1)
 
     return "\n".join(output)

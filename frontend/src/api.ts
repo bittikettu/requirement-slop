@@ -91,3 +91,9 @@ export const getExport = async (status?: string, priority?: string) => {
   );
   return response.data;
 };
+
+export const getReqIFExport = async () => {
+    // Axios might try to parse XML as JSON if valid, but here we expect string XML
+    const response = await api.get("/export/reqif", { responseType: 'text' });
+    return response.data; 
+};

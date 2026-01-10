@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 from ..scripts.asciidoc_generator import generate_asciidoc
+from ..scripts.reqif_generator import generate_reqif
 from .. import database
 
 router = APIRouter(
@@ -25,3 +26,9 @@ def export_asciidoc(
     # We'll delegate to a helper script/function to keep router clean
     content = generate_asciidoc(db, status_filter, priority_filter)
     return {"content": content}
+
+@router.get("/reqif")
+def export_reqif(db: Session = Depends(get_db)):
+    content = generate_reqif(db)
+    return Response(content=content, media_type="application/xml")
+
