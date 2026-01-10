@@ -1,0 +1,139 @@
+= Requirements Document
+:doctype: book
+:toc:
+
+== CANbus
+
+[[CAN-REQ-001]]
+=== CAN-REQ-001: The module shall support CiA Canopen
+
+[horizontal]
+Description::
+N/A
+Rationale::
+N/A
+Priority::
+Medium
+Status::
+Draft
+
+[[CAN-REQ-002]]
+=== CAN-REQ-002: The module shall support standard CAN-bus speeds
+
+[horizontal]
+Description::
+N/A
+Rationale::
+N/A
+Priority::
+High
+Status::
+Draft
+
+[[CAN-REQ-003]]
+=== CAN-REQ-003: The module shall support EN 50325
+WARNING: Draft
+[horizontal]
+Description::
+CANopen CC and CANopen CC safety application layer and communication profile for embedded networking
+Rationale::
+CANopen CC and CANopen CC safety application layer and communication profile for embedded networking
+Priority::
+Medium
+Status::
+Draft
+
+== IO requirements
+
+[[IO-REQ-001]]
+=== IO-REQ-001: The module shall have 8 digital inputs
+
+[horizontal]
+Description::
+- The module shall be equipped with 8 digital inputs designed for robust signal acquisition. 
+- Each input supports sufficient attenuation (e.g., up to 20 dB) to ensure proper signal conditioning and compatibility across various
+applications.
+- These inputs are compatible with standard digital signal standards, ensuring seamless data transmission and accurate signal representation within the system's operational range. 
+- The design incorporates features that mitigate common issues such as noise interference and signal distortion, ensuring reliable performance under diverse environmental conditions.
+
+Rationale::
+The requirement for **8 digital inputs** is justified by the need to:
+1. Support a wide range of sensors, controls, and user interactions.
+2. Ensure compatibility with existing systems and future expansions.
+3. Enhance reliability through redundancy and robust error handling.
+4. Provide a cost-effective, user-friendly solution that aligns with functional and safety requirements.
+Priority::
+Critical
+Status::
+Draft
+
+== kas buildsystem requirements
+
+[[KAS-REQ-001]]
+=== KAS-REQ-001: The System shall have kas as a build system
+
+[horizontal]
+Description::
+<<SYS-REQ-001>> is nice.
+Rationale::
+N/A
+Priority::
+Critical
+Status::
+Draft
+
+[[KAS-REQ-002]]
+=== KAS-REQ-002: If INPUT1 is pressed, then the OUTPUT1 shall activate
+
+[horizontal]
+Description::
+This requirement defines the system behavior where pressing INPUT1 causes OUTPUT1 to activate.
+Rationale::
+This behavior ensures that the system provides a direct and deterministic response to user input, allowing INPUT1 to control OUTPUT1 as part of the intended user interaction or control function.
+
+Do not do it.
+Priority::
+Critical
+Status::
+Released
+
+== system
+
+[[SYS-REQ-001]]
+=== SYS-REQ-001: System shall utilize Can
+
+[horizontal]
+Description::
+d
+Rationale::
+d
+Priority::
+Critical
+Status::
+Draft
+
+[[SYS-REQ-002]]
+=== SYS-REQ-002: System shall have 8 digital inputs
+
+[horizontal]
+Description::
+N/A
+Rationale::
+N/A
+Priority::
+Critical
+Status::
+Draft
+
+[[SYS-REQ-003]]
+=== SYS-REQ-003: The system shall have 8 analog inputs
+
+[horizontal]
+Description::
+N/A
+Rationale::
+N/A
+Priority::
+Medium
+Status::
+Draft
