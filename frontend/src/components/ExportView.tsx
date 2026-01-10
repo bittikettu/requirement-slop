@@ -1,11 +1,15 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { getExport, getReqIFExport } from '../api';
-import { Download, FileCode } from 'lucide-react';
+import { Download, FileCode, Eye, Code } from 'lucide-react';
+import Asciidoctor from '@asciidoctor/core';
+
+const asciidoctor = Asciidoctor();
 
 export default function ExportView() {
     const [content, setContent] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const [priorityFilter, setPriorityFilter] = useState("");
+    const [previewMode, setPreviewMode] = useState<'rendered' | 'raw'>('rendered');
 
     const generate = async () => {
         try {
@@ -15,6 +19,16 @@ export default function ExportView() {
             console.error(e);
         }
     }
+
+    const renderedHtml = useMemo(() => {
+        if (!content) return "";
+        try {
+            return asciidoctor.convert(content, { attributes: { showtitle: true } }) as string;
+        } catch (e) {
+            console.error("AsciiDoc conversion failed", e);
+            return "Failed to render AsciiDoc";
+        }
+    }, [content]);
 
     const download = () => {
         const blob = new Blob([content], { type: 'text/asciidoc' });
@@ -78,13 +92,36 @@ export default function ExportView() {
                 
                 {content && (
                     <>
-                        <div style={{display:'flex', justifyContent:'space-between', marginBottom:'0.5rem'}}>
-                            <h3>AsciiDoc Preview</h3>
+                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem'}}>
+                            <div style={{display:'flex', gap:'0.5rem', background:'var(--bg-color)', padding:'3px', borderRadius:'6px'}}>
+                                <button 
+                                    className={`btn ${previewMode === 'rendered' ? 'btn-primary' : ''}`}
+                                    style={{padding:'0.3rem 0.8rem', fontSize:'0.85rem'}}
+                                    onClick={() => setPreviewMode('rendered')}
+                                >
+                                    <Eye size={14}/> Rendered
+                                </button>
+                                <button 
+                                    className={`btn ${previewMode === 'raw' ? 'btn-primary' : ''}`}
+                                    style={{padding:'0.3rem 0.8rem', fontSize:'0.85rem'}}
+                                    onClick={() => setPreviewMode('raw')}
+                                >
+                                    <Code size={14}/> Raw Source
+                                </button>
+                            </div>
                             <button className="btn" onClick={download}><Download size={16}/> Download .adoc</button>
                         </div>
-                        <div className="asciidoc-preview">
-                            {content}
-                        </div>
+
+                        {previewMode === 'raw' ? (
+                            <div className="asciidoc-preview">
+                                {content}
+                            </div>
+                        ) : (
+                            <div 
+                                className="asciidoc-rendered-view"
+                                dangerouslySetInnerHTML={{ __html: renderedHtml }}
+                            />
+                        )}
                     </>
                 )}
              </div>

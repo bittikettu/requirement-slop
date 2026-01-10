@@ -359,4 +359,70 @@ select:focus {
   white-space: pre-wrap;
   font-family: "Courier New", monospace;
   overflow-x: auto;
+  border-radius: 6px;
+}
+
+.asciidoc-rendered-view {
+  background: white;
+  color: #333;
+  padding: 3rem;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  max-height: 800px;
+  line-height: 1.6;
+}
+
+.asciidoc-rendered-view h1 {
+  color: #222;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0.5rem;
+  margin-top: 0;
+}
+
+.asciidoc-rendered-view h2 {
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.3rem;
+  margin-top: 2rem;
+}
+
+.asciidoc-rendered-view h3 {
+  color: #444;
+  margin-top: 1.5rem;
+}
+
+.asciidoc-rendered-view p {
+  margin: 1rem 0;
+}
+
+.asciidoc-rendered-view .hdlist table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.asciidoc-rendered-view .hdlist td {
+  vertical-align: top;
+  padding: 0.5rem 0;
+}
+
+.asciidoc-rendered-view .hdlist-label {
+  font-weight: bold;
+  color: #666;
+  width: 150px;
+  padding-right: 1rem;
+}
+
+.asciidoc-rendered-view hr {
+  border: 0;
+  border-top: 1px solid #eee;
+  margin: 2rem 0;
+}
+
+.asciidoc-rendered-view a {
+  color: #0066cc;
+}
+
+.asciidoc-rendered-view ul {
+  padding-left: 1.5rem;
 }
