@@ -13,6 +13,7 @@ export default function RequirementDetail() {
     const [linkTarget, setLinkTarget] = useState("");
     const [error, setError] = useState("");
     const [earsResult, setEarsResult] = useState<EARSResponse | null>(null);
+    const [editEarsResult, setEditEarsResult] = useState<EARSResponse | null>(null);
 
     const load = useCallback(async () => {
         if(!id) return;
@@ -35,6 +36,24 @@ export default function RequirementDetail() {
     useEffect(() => {
         if(id) load();
     }, [id, load]);
+
+    useEffect(() => {
+        const title = editForm.title;
+        const timer = setTimeout(async () => {
+            if (!isEditing || !title) {
+                setEditEarsResult(null);
+                return;
+            }
+            try {
+                const res = await verifyEARS(title);
+                setEditEarsResult(res);
+            } catch (err) {
+                console.error("EARS verify failed", err);
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [isEditing, editForm.title]);
 
     const handleSave = async () => {
         if(!id || !editForm) return;
@@ -101,6 +120,21 @@ export default function RequirementDetail() {
                            <div className="field-group">
                                 <label className="field-label">Title</label>
                                 <input value={editForm.title} onChange={e => setEditForm({...editForm, title: e.target.value})} />
+                                {editForm.title && (
+                                    <div style={{marginTop:'0.5rem', fontSize:'0.85rem', display:'flex', alignItems:'center', gap:'0.4rem'}}>
+                                        {editEarsResult?.is_compliant ? (
+                                            <>
+                                                <CheckCircle size={14} color="#3fb950" />
+                                                <span style={{color:'#3fb950'}}>EARS Compliant ({editEarsResult.pattern})</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <AlertCircle size={14} color="#db6d28" />
+                                                <span style={{color:'#db6d28'}}>{editEarsResult?.hint || "Checking EARS..."}</span>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
                            </div>
                         </div>
                     ) : (
