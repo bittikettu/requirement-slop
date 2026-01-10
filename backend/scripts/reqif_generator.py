@@ -36,7 +36,7 @@ def generate_reqif(db: Session):
     # Error fix: REQ-IF-HEADER must have IDENTIFIER attribute and specific sub-elements
     header_container = SubElement(root, "THE-HEADER")
     header = SubElement(header_container, "REQ-IF-HEADER", {
-        "IDENTIFIER": str(uuid.uuid4())
+        "IDENTIFIER": f"_{uuid.uuid4()}"
     })
     SubElement(header, "CREATION-TIME").text = now_iso
     SubElement(header, "REQ-IF-TOOL-ID").text = "ReqTool"

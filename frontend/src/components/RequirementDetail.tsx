@@ -40,7 +40,10 @@ export default function RequirementDetail() {
     }, [id]);
 
     useEffect(() => {
-        if(id) load();
+        const trigger = async () => {
+            if(id) await load();
+        };
+        trigger();
     }, [id, load]);
 
     useEffect(() => {
