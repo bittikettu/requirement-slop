@@ -7,14 +7,15 @@ A lightweight and powerful requirement management tool designed for modern engin
 ## Features
 
 - **Requirement Management**: Create, edit, and organize requirements with ease.
-- **AI-Assisted Generation**: Generate requirement descriptions and rationales automatically using Ollama and `llama3:latest`.
+- **AI-Assisted Generation**: Generate requirement descriptions and rationales automatically. Configurable model selection (e.g., Llama 3, Phi-3) via the Settings menu.
+- **Visual Traceability Graph**: Interactive graph visualization of requirement relationships and dependencies.
 - **Hierarchical Organization**: Group requirements by project with auto-numbering and build parent-child relationships.
 - **Traceability Matrix**: Manage incoming and outgoing traces between requirements.
 - **EARS Verification**: Real-time checking of requirements against the Easy Approach to Requirements Syntax (EARS) patterns.
 - **History & Audit Logs**: Full tracking of change history for every requirement and a global system audit feed.
 - **Export Capabilities**:
   - **AsciiDoc**: Generate comprehensive documentation with hierarchy and traceability.
-  - **ReqIF**: Export requirements in the standard Requirements Interchange Format for tool interoperability.
+  - **ReqIF**: Export requirements in the standard Requirements Interchange Format for tool interoperability, including traceability relations.
 - **Open-WebUI**: Integrated dashboard for direct interaction with local LLMs.
 
 ## Technology Stack
