@@ -2,8 +2,10 @@ import { useState, useMemo } from 'react';
 import { getExport, getReqIFExport } from '../api';
 import { Download, FileCode, Eye, Code } from 'lucide-react';
 import Asciidoctor from '@asciidoctor/core';
+import kroki from 'asciidoctor-kroki';
 
 const asciidoctor = Asciidoctor();
+kroki.register(asciidoctor.Extensions);
 
 export default function ExportView() {
     const [content, setContent] = useState("");

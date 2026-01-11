@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@asciidoctor/core": "^3.0.4",
+    "asciidoctor-kroki": "^0.18.1",
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.562.0",
