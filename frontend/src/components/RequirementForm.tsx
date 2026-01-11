@@ -94,8 +94,8 @@ export default function RequirementForm() {
         try {
             const res = await generateAIDescription(form.title);
             setForm(prev => ({ ...prev, description: res.generated_text }));
-        } catch (err: any) {
-            setError(err.response?.data?.detail || "Failed to generate description");
+        } catch (err: unknown) {
+            setError((err as any).response?.data?.detail || "Failed to generate description");
         } finally {
             setIsGeneratingDesc(false);
         }
@@ -111,8 +111,8 @@ export default function RequirementForm() {
         try {
             const res = await generateAIRationale(form.title, form.description);
             setForm(prev => ({ ...prev, rationale: res.generated_text }));
-        } catch (err: any) {
-            setError(err.response?.data?.detail || "Failed to generate rationale");
+        } catch (err: unknown) {
+            setError((err as any).response?.data?.detail || "Failed to generate rationale");
         } finally {
             setIsGeneratingRat(false);
         }
