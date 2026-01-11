@@ -93,10 +93,12 @@ class AuditLogOut(BaseModel):
 
 class AIDescriptionRequest(BaseModel):
     title: str
+    model: Optional[str] = None
 
 class AIRationaleRequest(BaseModel):
     title: str
     description: str
+    model: Optional[str] = None
 
 class AIGenerationResponse(BaseModel):
     generated_text: str

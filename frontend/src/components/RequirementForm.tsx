@@ -97,9 +97,10 @@ export default function RequirementForm() {
         setError("");
         setForm(prev => ({ ...prev, description: "" }));
         try {
+            const model = localStorage.getItem('selectedModel') || undefined;
             await streamAIDescription(form.title, (chunk) => {
                 setForm(prev => ({ ...prev, description: (prev.description || "") + chunk }));
-            });
+            }, model);
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Failed to generate description");
         } finally {
@@ -116,9 +117,10 @@ export default function RequirementForm() {
         setError("");
         setForm(prev => ({ ...prev, rationale: "" }));
         try {
+            const model = localStorage.getItem('selectedModel') || undefined;
             await streamAIRationale(form.title, form.description, (chunk) => {
                 setForm(prev => ({ ...prev, rationale: (prev.rationale || "") + chunk }));
-            });
+            }, model);
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Failed to generate rationale");
         } finally {

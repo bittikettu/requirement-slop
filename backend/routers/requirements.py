@@ -17,6 +17,10 @@ router = APIRouter(
 def get_traceability_matrix(db: Session = Depends(database.get_db)):
     return db.query(models.Requirement).all()
 
+@router.get("/models", response_model=List[str])
+async def list_ai_models():
+    return await ai_service.list_models()
+
 @router.post("/verify-ears", response_model=schemas.EARSVerificationResponse)
 def verify_req_ears(req: schemas.EARSVerificationRequest):
     compliant, pattern, params = verify_ears(req.title)
@@ -43,11 +47,11 @@ def verify_req_ears(req: schemas.EARSVerificationRequest):
 
 @router.post("/generate-description")
 async def generate_req_description(req: schemas.AIDescriptionRequest):
-    return StreamingResponse(ai_service.generate_description(req.title), media_type="text/plain")
+    return StreamingResponse(ai_service.generate_description(req.title, req.model), media_type="text/plain")
 
 @router.post("/generate-rationale")
 async def generate_req_rationale(req: schemas.AIRationaleRequest):
-    return StreamingResponse(ai_service.generate_rationale(req.title, req.description), media_type="text/plain")
+    return StreamingResponse(ai_service.generate_rationale(req.title, req.description, req.model), media_type="text/plain")
 
 @router.post("/", response_model=schemas.RequirementOut)
 def create_requirement(req: schemas.RequirementCreate, db: Session = Depends(database.get_db)):

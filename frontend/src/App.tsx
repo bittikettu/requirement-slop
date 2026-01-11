@@ -6,6 +6,7 @@ import ExportView from './components/ExportView';
 import TraceabilityMatrix from './components/TraceabilityMatrix';
 import ProjectList from './components/ProjectList';
 import HistoryView from './components/HistoryView';
+import SettingsView from './components/SettingsView';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/traceability" element={<TraceabilityMatrix />} />
           <Route path="/projects" element={<ProjectList />} />
           <Route path="/history" element={<HistoryView />} />
+          <Route path="/settings" element={<SettingsView />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
