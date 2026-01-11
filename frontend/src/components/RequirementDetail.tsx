@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getRequirement, updateRequirement, deleteRequirement, createTrace, deleteTrace, verifyEARS, getAuditLogsForRequirement } from '../api';
-import type { RequirementDetail as ReqDetailType, EARSResponse, AuditLog } from '../api'
+import { getRequirement, updateRequirement, deleteRequirement, createTrace, deleteTrace, verifyEARS, getAuditLogsForRequirement, getRequirements } from '../api';
+import type { RequirementDetail as ReqDetailType, EARSResponse, AuditLog, Requirement } from '../api'
+import TraceabilityGraph from './TraceabilityGraph';
 import { Trash2, Edit3, Save, X, Link as LinkIcon, AlertTriangle, CheckCircle, AlertCircle, Clock, User } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -16,17 +17,20 @@ export default function RequirementDetail() {
     const [earsResult, setEarsResult] = useState<EARSResponse | null>(null);
     const [editEarsResult, setEditEarsResult] = useState<EARSResponse | null>(null);
     const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+    const [allReqs, setAllReqs] = useState<Requirement[]>([]);
 
     const load = useCallback(async () => {
         if(!id) return;
         try {
-            const [data, logs] = await Promise.all([
+            const [data, logs, all] = await Promise.all([
                 getRequirement(id),
-                getAuditLogsForRequirement(id)
+                getAuditLogsForRequirement(id),
+                getRequirements()
             ]);
             setReq(data);
             setEditForm(data);
             setAuditLogs(logs);
+            setAllReqs(all);
             setIsEditing(false);
             setError("");
             
@@ -239,6 +243,24 @@ export default function RequirementDetail() {
                 
                 <h3>Traceability</h3>
                 
+                <h3>Traceability Graph</h3>
+                <div style={{ marginBottom: '2rem' }}>
+                    <TraceabilityGraph 
+                        currentId={req.id}
+                        currentTitle={req.title}
+                        currentStatus={req.status}
+                        outgoingTraces={req.outgoing_traces.map(t => ({ 
+                            target_id: t.target_id,
+                            target_title: allReqs.find(r => r.id === t.target_id)?.title || "Loading..."
+                        }))}
+                        incomingTraces={req.incoming_traces.map(t => ({ 
+                            source_id: t.source_id,
+                            source_title: allReqs.find(r => r.id === t.source_id)?.title || "Loading..."
+                        }))}
+                        onNodeClick={(targetId) => navigate(`/requirements/${targetId}`)}
+                    />
+                </div>
+
                 <div style={{marginBottom:'1rem'}}>
                     <div style={{display:'flex', gap:'0.5rem', marginBottom:'0.5rem'}}>
                         <input 
