@@ -46,6 +46,10 @@ def test_asciidoc_traceability():
         print("--------------------------")
         
         # Basic validation
+        assert "== Traceability Diagram" in output
+        assert "[plantuml, traceability_diag, svg]" in output
+        assert "rectangle \"TP-001\\nReq 1\" as TP_001 <<Draft>>" in output
+        assert "TP_001 --> TP_002" in output
         assert "== Traceability Matrix" in output
         assert "| ID | Title | Traces To | Traces From" in output
         assert "| <<TP-001>> | Req 1 | <<TP-002>> | N/A" in output

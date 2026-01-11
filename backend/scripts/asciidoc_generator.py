@@ -91,6 +91,40 @@ def generate_asciidoc(db: Session, status_filter: str = None, priority_filter: s
         for root in project_roots:
             visit(root, 1)
 
+    # Sort all requirements by ID for the matrix and diagram
+    sorted_reqs = sorted(reqs, key=lambda x: x.id)
+
+    # Traceability Diagram
+    output.append("")
+    output.append("== Traceability Diagram")
+    output.append("")
+    output.append("[plantuml, traceability_diag, svg]")
+    output.append("----")
+    output.append("@startuml")
+    output.append("skinparam rectangle {")
+    output.append("    BackgroundColor<<Approved>> #LightGreen")
+    output.append("    BackgroundColor<<Released>> #LightBlue")
+    output.append("    BackgroundColor<<Draft>> #White")
+    output.append("}")
+    output.append("allow_mixing")
+    
+    # Add requirements as rectangles
+    for r in sorted_reqs:
+        # Puml IDs can't have hyphens if they are not quoted, or we can just use the ID as a name
+        # Using quotes to be safe
+        status_tag = f"<<{r.status}>>"
+        output.append(f'rectangle "{r.id}\\n{r.title}" as {r.id.replace("-", "_")} {status_tag}')
+        
+    # Add traces
+    for r in sorted_reqs:
+        for t in r.outgoing_traces:
+            source = r.id.replace("-", "_")
+            target = t.target_id.replace("-", "_")
+            output.append(f"{source} --> {target}")
+            
+    output.append("@enduml")
+    output.append("----")
+
     # Traceability Matrix
     output.append("")
     output.append("== Traceability Matrix")
@@ -98,9 +132,6 @@ def generate_asciidoc(db: Session, status_filter: str = None, priority_filter: s
     output.append("[cols=\"1,2,2,2\", options=\"header\"]")
     output.append("|===")
     output.append("| ID | Title | Traces To | Traces From")
-    
-    # Sort all requirements by ID for the matrix
-    sorted_reqs = sorted(reqs, key=lambda x: x.id)
     
     for r in sorted_reqs:
         traces_to = ", ".join([f"<<{t.target_id}>>" for t in r.outgoing_traces]) or "N/A"
