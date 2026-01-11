@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getRequirement, updateRequirement, deleteRequirement, createTrace, deleteTrace, verifyEARS, getAuditLogsForRequirement, getRequirements } from '../api';
+import { getRequirement, updateRequirement, deleteRequirement, createTrace, deleteTrace, verifyEARS, getAuditLogsForRequirement, getRequirements, streamAIDescription, streamAIRationale } from '../api';
 import type { RequirementDetail as ReqDetailType, EARSResponse, AuditLog, Requirement } from '../api'
 import TraceabilityGraph from './TraceabilityGraph';
-import { Trash2, Edit3, Save, X, Link as LinkIcon, AlertTriangle, CheckCircle, AlertCircle, Clock, User } from 'lucide-react';
+import { Trash2, Edit3, Save, X, Link as LinkIcon, AlertTriangle, CheckCircle, AlertCircle, Clock, User, Sparkles, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function RequirementDetail() {
@@ -18,6 +18,8 @@ export default function RequirementDetail() {
     const [editEarsResult, setEditEarsResult] = useState<EARSResponse | null>(null);
     const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
     const [allReqs, setAllReqs] = useState<Requirement[]>([]);
+    const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
+    const [isGeneratingRat, setIsGeneratingRat] = useState(false);
 
     const load = useCallback(async () => {
         if(!id) return;
@@ -67,6 +69,42 @@ export default function RequirementDetail() {
 
         return () => clearTimeout(timer);
     }, [isEditing, editForm.title]);
+
+    const handleGenerateDescription = async () => {
+        if (!editForm.title) return;
+        setIsGeneratingDesc(true);
+        setError("");
+        const model = localStorage.getItem('selectedModel') || undefined;
+        const currentContent = editForm.description || "";
+        setEditForm(prev => ({ ...prev, description: "" }));
+        try {
+            await streamAIDescription(editForm.title, (chunk) => {
+                setEditForm(prev => ({ ...prev, description: (prev.description || "") + chunk }));
+            }, model, currentContent);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Failed to generate description");
+        } finally {
+            setIsGeneratingDesc(false);
+        }
+    };
+
+    const handleGenerateRationale = async () => {
+        if (!editForm.title || !editForm.description) return;
+        setIsGeneratingRat(true);
+        setError("");
+        const model = localStorage.getItem('selectedModel') || undefined;
+        const currentContent = editForm.rationale || "";
+        setEditForm(prev => ({ ...prev, rationale: "" }));
+        try {
+            await streamAIRationale(editForm.title, editForm.description, (chunk) => {
+                setEditForm(prev => ({ ...prev, rationale: (prev.rationale || "") + chunk }));
+            }, model, currentContent);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Failed to generate rationale");
+        } finally {
+            setIsGeneratingRat(false);
+        }
+    };
 
     const handleSave = async () => {
         if(!id || !editForm) return;
@@ -195,7 +233,20 @@ export default function RequirementDetail() {
                 </div>
 
                 <div className="field-group">
-                    <label className="field-label">Description</label>
+                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '4px'}}>
+                        <label className="field-label" style={{marginBottom:0}}>Description</label>
+                        {isEditing && req.status === 'Draft' && (
+                            <button 
+                                className="btn btn-secondary" 
+                                style={{padding: '2px 8px', fontSize: '0.75rem', display:'flex', alignItems:'center', gap:'4px'}}
+                                onClick={handleGenerateDescription}
+                                disabled={isGeneratingDesc || !editForm.title}
+                            >
+                                {isGeneratingDesc ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                AI Refine
+                            </button>
+                        )}
+                    </div>
                     {isEditing ? (
                         <textarea rows={4} value={editForm.description || ""} onChange={e => setEditForm({...editForm, description: e.target.value})} />
                     ) : (
@@ -204,7 +255,20 @@ export default function RequirementDetail() {
                 </div>
 
                  <div className="field-group">
-                    <label className="field-label">Rationale</label>
+                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '4px'}}>
+                        <label className="field-label" style={{marginBottom:0}}>Rationale</label>
+                        {isEditing && req.status === 'Draft' && (
+                            <button 
+                                className="btn btn-secondary" 
+                                style={{padding: '2px 8px', fontSize: '0.75rem', display:'flex', alignItems:'center', gap:'4px'}}
+                                onClick={handleGenerateRationale}
+                                disabled={isGeneratingRat || !editForm.title || !editForm.description}
+                            >
+                                {isGeneratingRat ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                AI Refine
+                            </button>
+                        )}
+                    </div>
                     {isEditing ? (
                         <textarea rows={2} value={editForm.rationale || ""} onChange={e => setEditForm({...editForm, rationale: e.target.value})} />
                     ) : (

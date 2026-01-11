@@ -143,12 +143,12 @@ export const getAIModels = async (): Promise<string[]> => {
     return response.data;
 };
 
-export const streamAIDescription = async (title: string, onChunk: (chunk: string) => void, model?: string) => {
+export const streamAIDescription = async (title: string, onChunk: (chunk: string) => void, model?: string, currentDescription?: string) => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
     const response = await fetch(`${baseUrl}/requirements/generate-description`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, model })
+        body: JSON.stringify({ title, model, current_description: currentDescription })
     });
     
     if (!response.ok) {
@@ -173,12 +173,12 @@ export const streamAIDescription = async (title: string, onChunk: (chunk: string
     }
 };
 
-export const streamAIRationale = async (title: string, description: string, onChunk: (chunk: string) => void, model?: string) => {
+export const streamAIRationale = async (title: string, description: string, onChunk: (chunk: string) => void, model?: string, currentRationale?: string) => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
     const response = await fetch(`${baseUrl}/requirements/generate-rationale`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description, model })
+        body: JSON.stringify({ title, description, model, current_rationale: currentRationale })
     });
     
     if (!response.ok) {
