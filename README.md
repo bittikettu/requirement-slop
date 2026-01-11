@@ -25,16 +25,33 @@ A lightweight and powerful requirement management tool designed for modern engin
 
 Developed using **Antigravity**, a powerful agentic AI coding assistant.
 
-## Setup & Running
+### Running with Docker (Recommended)
 
-### Backend
+The easiest way to launch the entire stack is using Docker Compose:
+
+1. Ensure Docker Desktop is running.
+2. Run the following command from the root directory:
+   ```bash
+   docker compose up --build -d
+   ```
+3. Access the application:
+   - **Frontend**: [http://localhost](http://localhost)
+   - **Backend API**: [http://localhost:8000](http://localhost:8000)
+
+The database will be stored in a persistent Docker volume named `db-data`.
+
+### Manual Setup
+
+If you prefer to run the components manually:
+
+#### Backend
 
 1. Navigate to `backend/`
 2. Create and activate a virtual environment.
 3. Install dependencies: `pip install -r requirements.txt`
 4. Start the server: `python -m uvicorn main:app --reload`
 
-### Frontend
+#### Frontend
 
 1. Navigate to `frontend/`
 2. Install dependencies: `bun install`
