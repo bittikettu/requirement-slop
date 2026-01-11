@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { createRequirement, getProjects, verifyEARS } from '../api';
+import { createRequirement, getProjects, verifyEARS, generateAIDescription, generateAIRationale } from '../api';
 import type { Requirement, Project, EARSResponse } from '../api';
-import { Save, CheckCircle, AlertCircle } from 'lucide-react';
+import { Save, CheckCircle, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
 
 export default function RequirementForm() {
     const navigate = useNavigate();
@@ -21,6 +21,8 @@ export default function RequirementForm() {
     const [selectedProject, setSelectedProject] = useState<string>(""); 
     const [error, setError] = useState("");
     const [earsResult, setEarsResult] = useState<EARSResponse | null>(null);
+    const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
+    const [isGeneratingRat, setIsGeneratingRat] = useState(false);
 
     useEffect(() => {
         getProjects().then(data => {
@@ -81,6 +83,40 @@ export default function RequirementForm() {
             setError(err.response?.data?.detail || "Failed to create");
         }
     }
+
+    const handleGenerateDescription = async () => {
+        if (!form.title) {
+            setError("Please enter a title first");
+            return;
+        }
+        setIsGeneratingDesc(true);
+        setError("");
+        try {
+            const res = await generateAIDescription(form.title);
+            setForm(prev => ({ ...prev, description: res.generated_text }));
+        } catch (err: any) {
+            setError(err.response?.data?.detail || "Failed to generate description");
+        } finally {
+            setIsGeneratingDesc(false);
+        }
+    };
+
+    const handleGenerateRationale = async () => {
+        if (!form.title || !form.description) {
+            setError("Please enter title and description first");
+            return;
+        }
+        setIsGeneratingRat(true);
+        setError("");
+        try {
+            const res = await generateAIRationale(form.title, form.description);
+            setForm(prev => ({ ...prev, rationale: res.generated_text }));
+        } catch (err: any) {
+            setError(err.response?.data?.detail || "Failed to generate rationale");
+        } finally {
+            setIsGeneratingRat(false);
+        }
+    };
 
     return (
         <div className="main-content">
@@ -148,12 +184,34 @@ export default function RequirementForm() {
                </div>
 
                <div className="field-group">
-                    <label className="field-label">Description</label>
+                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '4px'}}>
+                        <label className="field-label" style={{marginBottom:0}}>Description</label>
+                        <button 
+                            className="btn btn-secondary" 
+                            style={{padding: '2px 8px', fontSize: '0.75rem', display:'flex', alignItems:'center', gap:'4px'}}
+                            onClick={handleGenerateDescription}
+                            disabled={isGeneratingDesc || !form.title}
+                        >
+                            {isGeneratingDesc ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                            AI Generate
+                        </button>
+                    </div>
                     <textarea rows={4} value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
                 </div>
 
                  <div className="field-group">
-                    <label className="field-label">Rationale</label>
+                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '4px'}}>
+                        <label className="field-label" style={{marginBottom:0}}>Rationale</label>
+                        <button 
+                            className="btn btn-secondary" 
+                            style={{padding: '2px 8px', fontSize: '0.75rem', display:'flex', alignItems:'center', gap:'4px'}}
+                            onClick={handleGenerateRationale}
+                            disabled={isGeneratingRat || !form.title || !form.description}
+                        >
+                            {isGeneratingRat ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                            AI Generate
+                        </button>
+                    </div>
                     <textarea rows={2} value={form.rationale} onChange={e => setForm({...form, rationale: e.target.value})} />
                 </div>
                 

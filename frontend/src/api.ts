@@ -127,3 +127,13 @@ export const getAuditLogsForRequirement = async (reqId: string) => {
     const response = await api.get<AuditLog[]>(`/audit/requirements/${reqId}`);
     return response.data;
 };
+
+export const generateAIDescription = async (title: string) => {
+    const response = await api.post<{ generated_text: string }>("/requirements/generate-description", { title });
+    return response.data;
+};
+
+export const generateAIRationale = async (title: string, description: string) => {
+    const response = await api.post<{ generated_text: string }>("/requirements/generate-rationale", { title, description });
+    return response.data;
+};

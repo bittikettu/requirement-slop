@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from .. import models, schemas, database
 from ..scripts.ears_verifier import verify_ears
+from .. import ai_service
 from datetime import datetime
 
 router = APIRouter(
@@ -38,6 +39,16 @@ def verify_req_ears(req: schemas.EARSVerificationRequest):
         pattern=pattern,
         hint=hint
     )
+
+@router.post("/generate-description", response_model=schemas.AIGenerationResponse)
+async def generate_req_description(req: schemas.AIDescriptionRequest):
+    text = await ai_service.generate_description(req.title)
+    return schemas.AIGenerationResponse(generated_text=text)
+
+@router.post("/generate-rationale", response_model=schemas.AIGenerationResponse)
+async def generate_req_rationale(req: schemas.AIRationaleRequest):
+    text = await ai_service.generate_rationale(req.title, req.description)
+    return schemas.AIGenerationResponse(generated_text=text)
 
 @router.post("/", response_model=schemas.RequirementOut)
 def create_requirement(req: schemas.RequirementCreate, db: Session = Depends(database.get_db)):

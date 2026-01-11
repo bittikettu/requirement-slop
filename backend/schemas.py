@@ -90,3 +90,13 @@ class AuditLogOut(BaseModel):
     details: str
 
     model_config = ConfigDict(from_attributes=True)
+
+class AIDescriptionRequest(BaseModel):
+    title: str
+
+class AIRationaleRequest(BaseModel):
+    title: str
+    description: str
+
+class AIGenerationResponse(BaseModel):
+    generated_text: str
