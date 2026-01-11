@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createRequirement, getProjects, verifyEARS, streamAIDescription, streamAIRationale } from '../api';
 import type { Requirement, Project, EARSResponse } from '../api';
@@ -79,8 +80,11 @@ export default function RequirementForm() {
             navigate(`/requirements/${created.id}`);
             // Force reload sidebar? it polls.
         } catch (err: unknown) {
-            // @ts-expect-error: Axios error type handling needs refinement
-            setError(err.response?.data?.detail || "Failed to create");
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.detail || "Failed to create");
+            } else {
+                setError("An unexpected error occurred");
+            }
         }
     }
 
@@ -97,7 +101,7 @@ export default function RequirementForm() {
                 setForm(prev => ({ ...prev, description: (prev.description || "") + chunk }));
             });
         } catch (err: unknown) {
-            setError(((err as any).response?.data?.detail || "Failed to generate description"));
+            setError(err instanceof Error ? err.message : "Failed to generate description");
         } finally {
             setIsGeneratingDesc(false);
         }
@@ -116,7 +120,7 @@ export default function RequirementForm() {
                 setForm(prev => ({ ...prev, rationale: (prev.rationale || "") + chunk }));
             });
         } catch (err: unknown) {
-            setError(((err as any).response?.data?.detail || "Failed to generate rationale"));
+            setError(err instanceof Error ? err.message : "Failed to generate rationale");
         } finally {
             setIsGeneratingRat(false);
         }

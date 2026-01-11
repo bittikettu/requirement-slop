@@ -146,6 +146,17 @@ export const streamAIDescription = async (title: string, onChunk: (chunk: string
         body: JSON.stringify({ title })
     });
     
+    if (!response.ok) {
+        let detail = "Failed to generate description";
+        try {
+            const errorData = await response.json();
+            detail = errorData.detail || detail;
+        } catch {
+            // ignore JSON parse error
+        }
+        throw new Error(detail);
+    }
+    
     if (!response.body) return;
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
@@ -164,6 +175,17 @@ export const streamAIRationale = async (title: string, description: string, onCh
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, description })
     });
+    
+    if (!response.ok) {
+        let detail = "Failed to generate rationale";
+        try {
+            const errorData = await response.json();
+            detail = errorData.detail || detail;
+        } catch {
+            // ignore JSON parse error
+        }
+        throw new Error(detail);
+    }
     
     if (!response.body) return;
     const reader = response.body.getReader();
