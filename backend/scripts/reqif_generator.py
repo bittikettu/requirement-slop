@@ -16,6 +16,7 @@ def generate_reqif(db: Session):
     dt_string_id = f"_{uuid.uuid4()}"
     spec_object_type_id = f"_{uuid.uuid4()}" 
     spec_type_id = f"_{uuid.uuid4()}"
+    spec_relation_type_id = f"_{uuid.uuid4()}"
     
     # Attribute Definitions IDs
     attr_title_id = f"_{uuid.uuid4()}"
@@ -88,6 +89,13 @@ def generate_reqif(db: Session):
         "IDENTIFIER": spec_type_id,
         "LAST-CHANGE": now_iso,
         "LONG-NAME": "Specification Type"
+    })
+    
+    # SpecRelationType (Trace Type)
+    spec_rel_type = SubElement(spec_types, "SPEC-RELATION-TYPE", {
+        "IDENTIFIER": spec_relation_type_id,
+        "LAST-CHANGE": now_iso,
+        "LONG-NAME": "Trace Relation"
     })
     
     # 3. SPEC-OBJECTS (The actual requirements)
@@ -188,7 +196,27 @@ def generate_reqif(db: Session):
         for root_req in roots:
             add_hierarchy(children_container, root_req)
 
-    # 5. SPEC-RELATIONS (Traces) - TODO for later if needed, but simplest start is just objects and tree
+    # 5. SPEC-RELATIONS (Traces)
+    traces = db.query(models.Trace).all()
+    if traces:
+        spec_relations_container = SubElement(req_if_content, "SPEC-RELATIONS")
+        for t in traces:
+            # Only export if both source and target exist in the exported set
+            if t.source_id in req_uuid_map and t.target_id in req_uuid_map:
+                rel_id = f"_{uuid.uuid4()}"
+                rel = SubElement(spec_relations_container, "SPEC-RELATION", {
+                    "IDENTIFIER": rel_id,
+                    "LAST-CHANGE": now_iso
+                })
+                
+                type_ref = SubElement(rel, "TYPE")
+                SubElement(type_ref, "SPEC-RELATION-TYPE-REF").text = spec_relation_type_id
+                
+                source_ref = SubElement(rel, "SOURCE")
+                SubElement(source_ref, "SPEC-OBJECT-REF").text = req_uuid_map[t.source_id]
+                
+                target_ref = SubElement(rel, "TARGET")
+                SubElement(target_ref, "SPEC-OBJECT-REF").text = req_uuid_map[t.target_id]
     
     from xml.dom import minidom
     xmlstr = minidom.parseString(tostring(root)).toprettyxml(indent="  ")
