@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { createRequirement, getProjects, verifyEARS, generateAIDescription, generateAIRationale } from '../api';
+import { createRequirement, getProjects, verifyEARS, streamAIDescription, streamAIRationale } from '../api';
 import type { Requirement, Project, EARSResponse } from '../api';
 import { Save, CheckCircle, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
 
@@ -91,11 +91,13 @@ export default function RequirementForm() {
         }
         setIsGeneratingDesc(true);
         setError("");
+        setForm(prev => ({ ...prev, description: "" }));
         try {
-            const res = await generateAIDescription(form.title);
-            setForm(prev => ({ ...prev, description: res.generated_text }));
+            await streamAIDescription(form.title, (chunk) => {
+                setForm(prev => ({ ...prev, description: (prev.description || "") + chunk }));
+            });
         } catch (err: unknown) {
-            setError((err as any).response?.data?.detail || "Failed to generate description");
+            setError(((err as any).response?.data?.detail || "Failed to generate description"));
         } finally {
             setIsGeneratingDesc(false);
         }
@@ -108,11 +110,13 @@ export default function RequirementForm() {
         }
         setIsGeneratingRat(true);
         setError("");
+        setForm(prev => ({ ...prev, rationale: "" }));
         try {
-            const res = await generateAIRationale(form.title, form.description);
-            setForm(prev => ({ ...prev, rationale: res.generated_text }));
+            await streamAIRationale(form.title, form.description, (chunk) => {
+                setForm(prev => ({ ...prev, rationale: (prev.rationale || "") + chunk }));
+            });
         } catch (err: unknown) {
-            setError((err as any).response?.data?.detail || "Failed to generate rationale");
+            setError(((err as any).response?.data?.detail || "Failed to generate rationale"));
         } finally {
             setIsGeneratingRat(false);
         }

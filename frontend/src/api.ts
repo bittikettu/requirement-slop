@@ -137,3 +137,41 @@ export const generateAIRationale = async (title: string, description: string) =>
     const response = await api.post<{ generated_text: string }>("/requirements/generate-rationale", { title, description });
     return response.data;
 };
+
+export const streamAIDescription = async (title: string, onChunk: (chunk: string) => void) => {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+    const response = await fetch(`${baseUrl}/requirements/generate-description`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title })
+    });
+    
+    if (!response.body) return;
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        onChunk(decoder.decode(value));
+    }
+};
+
+export const streamAIRationale = async (title: string, description: string, onChunk: (chunk: string) => void) => {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+    const response = await fetch(`${baseUrl}/requirements/generate-rationale`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description })
+    });
+    
+    if (!response.body) return;
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        onChunk(decoder.decode(value));
+    }
+};
