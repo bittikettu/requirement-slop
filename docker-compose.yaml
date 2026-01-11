@@ -20,5 +20,31 @@ services:
       - backend
     restart: unless-stopped
 
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    ports:
+      - "3000:8080"
+    volumes:
+      - open-webui-data:/app/backend/data
+    environment:
+      - OPENAI_API_BASE_URL=http://host.docker.internal:11434/v1
+      - OPENAI_API_KEY=dummy-key
+
+      # Explicitly disable Ollama auto-connect
+      - OLLAMA_BASE_URL=
+
+      # WebUI settings
+      - WEBUI_AUTH=false
+      - WEBUI_SECRET_KEY=dummysecretkey
+      - ENABLE_TITLE_GENERATION=false
+      - ENABLE_TAGS_GENERATION=false
+      - ENABLE_RETRIEVAL_QUERY_GENERATION=false
+      - ENABLE_IMAGE_PROMPT_GENERATION=false
+      - ENABLE_WEB_SEARCH=false
+      - ENABLE_SEARCH_QUERY_GENERATION=false
+    restart: unless-stopped
+
 volumes:
   db-data:
+  open-webui-data:

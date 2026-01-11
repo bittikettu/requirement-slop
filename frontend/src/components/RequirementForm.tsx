@@ -119,7 +119,17 @@ export default function RequirementForm() {
 
                 <div className="field-group">
                     <label className="field-label">Title</label>
-                    <input value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
+                    <input value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="Requirement title..." />
+                    <div style={{marginTop:'0.5rem', fontSize:'0.75rem', color:'#8b949e', padding: '0.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '4px'}}>
+                        <strong>EARS Patterns:</strong>
+                        <ul style={{margin: '4px 0 0 1rem', padding: 0}}>
+                            <li><strong>Ubiquitous:</strong> The &lt;system&gt; shall &lt;action&gt;.</li>
+                            <li><strong>Event-driven:</strong> When &lt;event&gt;, the &lt;system&gt; shall &lt;action&gt;.</li>
+                            <li><strong>State-driven:</strong> While &lt;state&gt;, the &lt;system&gt; shall &lt;action&gt;.</li>
+                            <li><strong>Unwanted behavior:</strong> If &lt;condition&gt;, then the &lt;system&gt; shall &lt;action&gt;.</li>
+                            <li><strong>Optional feature:</strong> Where &lt;feature is included&gt;, the &lt;system&gt; shall &lt;action&gt;.</li>
+                        </ul>
+                    </div>
                     {form.title && (
                         <div style={{marginTop:'0.5rem', fontSize:'0.85rem', display:'flex', alignItems:'center', gap:'0.4rem'}}>
                             {earsResult?.is_compliant ? (

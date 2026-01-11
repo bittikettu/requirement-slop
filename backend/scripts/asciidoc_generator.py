@@ -101,6 +101,7 @@ def generate_asciidoc(db: Session, status_filter: str = None, priority_filter: s
     output.append("[plantuml, traceability_diag, svg]")
     output.append("----")
     output.append("@startuml")
+    output.append("left to right direction")
     output.append("skinparam rectangle {")
     output.append("    BackgroundColor<<Approved>> #LightGreen")
     output.append("    BackgroundColor<<Released>> #LightBlue")
