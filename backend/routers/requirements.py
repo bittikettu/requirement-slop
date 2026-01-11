@@ -47,8 +47,8 @@ def create_requirement(req: schemas.RequirementCreate, db: Session = Depends(dat
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
         
-        # Generate ID: PREFIX + PAD(next_number)
-        generated_id = f"{project.prefix}{project.next_number:03d}"
+        # Generate ID: PREFIX + next_number
+        generated_id = f"{project.prefix}{project.next_number}"
         
         # Ensure generated ID doesn't exist (safety)
         if db.query(models.Requirement).filter(models.Requirement.id == generated_id).first():
