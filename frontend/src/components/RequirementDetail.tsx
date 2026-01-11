@@ -264,11 +264,17 @@ export default function RequirementDetail() {
                 <div style={{marginBottom:'1rem'}}>
                     <div style={{display:'flex', gap:'0.5rem', marginBottom:'0.5rem'}}>
                         <input 
+                            list="requirement-ids"
                             placeholder="Link to Requirement ID..." 
                             value={linkTarget} 
                             onChange={e => setLinkTarget(e.target.value)}
                             style={{maxWidth:'200px'}}
                         />
+                        <datalist id="requirement-ids">
+                            {allReqs.filter(r => r.id !== req.id).map(r => (
+                                <option key={r.id} value={r.id}>{r.title}</option>
+                            ))}
+                        </datalist>
                         <button className="btn" onClick={handleAddTrace}><LinkIcon size={14}/> Link</button>
                     </div>
                 </div>

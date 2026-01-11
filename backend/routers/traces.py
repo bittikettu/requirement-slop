@@ -53,18 +53,18 @@ def create_trace(trace: schemas.TraceCreate, db: Session = Depends(get_db)):
     return new_trace
 
 @router.delete("/", status_code=204)
-def delete_trace(source_id: str, target_id: str, db: Session = Depends(get_db)):
-    trace = db.query(models.Trace).filter(
-        models.Trace.source_id == source_id,
-        models.Trace.target_id == target_id
+def delete_trace(trace: schemas.TraceCreate, db: Session = Depends(get_db)):
+    trace_obj = db.query(models.Trace).filter(
+        models.Trace.source_id == trace.source_id,
+        models.Trace.target_id == trace.target_id
     ).first()
     
-    if not trace:
+    if not trace_obj:
         raise HTTPException(status_code=404, detail="Trace not found")
 
     # REQ-TRACE-003: Prevent deletion if Approved
-    source = trace.source
-    target = trace.target
+    source = trace_obj.source
+    target = trace_obj.target
     
     if source.status == models.RequirementStatus.APPROVED.value:
         raise HTTPException(status_code=400, detail=f"Cannot delete trace: Source {source.id} is Approved")
@@ -72,7 +72,7 @@ def delete_trace(source_id: str, target_id: str, db: Session = Depends(get_db)):
     if target.status == models.RequirementStatus.APPROVED.value:
         raise HTTPException(status_code=400, detail=f"Cannot delete trace: Target {target.id} is Approved")
 
-    db.delete(trace)
+    db.delete(trace_obj)
     
     # Audit
     db.add(models.AuditLog(req_id=source.id, action="UNLINK", details=f"Unlinked from {target.id}"))
