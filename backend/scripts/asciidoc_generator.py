@@ -66,8 +66,8 @@ def generate_asciidoc(db: Session, status_filter: str = None, priority_filter: s
             output.append("Traces to::\n")
             links = []
             for t in r.outgoing_traces:
-                links.append(f"<<{t.target_id}>>")
-            output.append(", ".join(links))
+                links.append(f"- <<{t.target_id}>>")
+            output.append("\n".join(links))
         
         output.append("")
         
@@ -90,5 +90,24 @@ def generate_asciidoc(db: Session, status_filter: str = None, priority_filter: s
         # Roots are level 1 requirements relative to the project
         for root in project_roots:
             visit(root, 1)
+
+    # Traceability Matrix
+    output.append("")
+    output.append("== Traceability Matrix")
+    output.append("")
+    output.append("[cols=\"1,2,2,2\", options=\"header\"]")
+    output.append("|===")
+    output.append("| ID | Title | Traces To | Traces From")
+    
+    # Sort all requirements by ID for the matrix
+    sorted_reqs = sorted(reqs, key=lambda x: x.id)
+    
+    for r in sorted_reqs:
+        traces_to = ", ".join([f"<<{t.target_id}>>" for t in r.outgoing_traces]) or "N/A"
+        traces_from = ", ".join([f"<<{t.source_id}>>" for t in r.incoming_traces]) or "N/A"
+        
+        output.append(f"| <<{r.id}>> | {r.title} | {traces_to} | {traces_from}")
+    
+    output.append("|===")
 
     return "\n".join(output)

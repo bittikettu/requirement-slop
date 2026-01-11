@@ -26,6 +26,7 @@ class TraceBase(BaseModel):
     pass
 
 class TraceCreate(TraceBase):
+    source_id: str
     target_id: str
 
 class TraceOut(BaseModel):
@@ -52,7 +53,6 @@ class RequirementUpdate(BaseModel):
     description: Optional[str] = None
     rationale: Optional[str] = None
     priority: Optional[str] = None
-    status: Optional[RequirementStatus] = None
     status: Optional[RequirementStatus] = None
     parent_id: Optional[str] = None
     project_id: Optional[int] = None
