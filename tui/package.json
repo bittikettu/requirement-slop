@@ -1,0 +1,30 @@
+{
+  "name": "tui",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^25.0.6",
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.0",
+    "ts-node": "^10.9.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@types/blessed": "^0.1.27",
+    "axios": "^1.13.2",
+    "blessed": "^0.1.81",
+    "ink": "^6.6.0",
+    "ink-select-input": "5",
+    "ink-text-input": "5",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "zod": "^4.3.5"
+  }
+}
