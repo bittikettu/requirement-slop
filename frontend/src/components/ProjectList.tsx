@@ -5,7 +5,7 @@ import { FolderPlus, Save } from 'lucide-react';
 
 export default function ProjectList() {
     const [projects, setProjects] = useState<Project[]>([]);
-    const [newProject, setNewProject] = useState({ name: '', prefix: '' });
+    const [newProject, setNewProject] = useState({ name: '', prefix: '', description: '' });
     const [error, setError] = useState("");
 
     const loadProjects = async () => {
@@ -29,7 +29,7 @@ export default function ProjectList() {
         }
         try {
             await createProject(newProject);
-            setNewProject({ name: '', prefix: '' });
+            setNewProject({ name: '', prefix: '', description: '' });
             loadProjects();
         } catch (err: unknown) {
             // @ts-expect-error: Axios type
@@ -57,11 +57,19 @@ export default function ProjectList() {
                         />
                     </div>
                     <div className="field-group">
-                        <label className="field-label">Prefix (e.g. SYS-REQ-)</label>
                         <input 
                             value={newProject.prefix} 
                             onChange={e => setNewProject({...newProject, prefix: e.target.value})}
                             placeholder="SYS-REQ-"
+                        />
+                    </div>
+                    <div className="field-group" style={{gridColumn: '1 / -1'}}>
+                        <label className="field-label">Description (Optional - Used for AI Context)</label>
+                        <textarea 
+                            value={newProject.description} 
+                            onChange={e => setNewProject({...newProject, description: e.target.value})}
+                            placeholder="Describe the system or project context..."
+                            rows={2}
                         />
                     </div>
                     <button className="btn btn-primary" onClick={handleCreate} style={{marginBottom:'2px'}}>
@@ -76,6 +84,7 @@ export default function ProjectList() {
                         <tr style={{textAlign:'left', borderBottom:'1px solid var(--border)'}}>
                             <th style={{padding:'0.5rem'}}>Name</th>
                             <th style={{padding:'0.5rem'}}>Prefix</th>
+                            <th style={{padding:'0.5rem'}}>Description</th>
                             <th style={{padding:'0.5rem'}}>Next ID</th>
                         </tr>
                     </thead>
@@ -84,10 +93,11 @@ export default function ProjectList() {
                             <tr key={p.id} style={{borderBottom:'1px solid var(--border)'}}>
                                 <td style={{padding:'0.5rem'}}>{p.name}</td>
                                 <td style={{padding:'0.5rem'}}><span className="badge">{p.prefix}</span></td>
+                                <td style={{padding:'0.5rem', color:'#8b949e', fontSize:'0.9em'}}>{p.description || '-'}</td>
                                 <td style={{padding:'0.5rem'}}>{p.next_number}</td>
                             </tr>
                         ))}
-                        {projects.length === 0 && <tr><td colSpan={3} style={{padding:'1rem', textAlign:'center', color:'#8b949e'}}>No projects defined</td></tr>}
+                        {projects.length === 0 && <tr><td colSpan={4} style={{padding:'1rem', textAlign:'center', color:'#8b949e'}}>No projects defined</td></tr>}
                     </tbody>
                 </table>
             </div>

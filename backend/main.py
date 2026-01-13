@@ -6,6 +6,18 @@ from . import database, models
 # Create DB tables
 models.Base.metadata.create_all(bind=database.engine)
 
+# "Poor man's migration" - Ensure description column exists
+try:
+    with database.engine.connect() as conn:
+        from sqlalchemy import text
+        conn.execute(text("ALTER TABLE projects ADD COLUMN description VARCHAR"))
+        conn.commit()
+        print("Migrated: Added description column to projects table")
+except Exception as e:
+    # Column likely exists
+    print(f"Migration note: {e}")
+    pass
+
 app = FastAPI(title="ReqTool API")
 
 app.add_middleware(

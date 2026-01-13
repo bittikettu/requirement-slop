@@ -17,19 +17,21 @@ async def list_models():
         print(f"Ollama list models error: {e}")
         return [DEFAULT_MODEL]
 
-async def generate_description(title: str, current_description: str = None, model: str = None):
+async def generate_description(title: str, current_description: str = None, model: str = None, project_description: str = None):
+    context = f"Project Context: {project_description}\n" if project_description else ""
     if current_description:
-        prompt = f"As a requirements engineer, improve and refine the following draft description for a software requirement with the title: '{title}'.\n\nDraft Description:\n{current_description}\n\nReturn only the improved description text, no preamble."
+        prompt = f"As a requirements engineer, improve and refine the following draft description for a software requirement with the title: '{title}'.\n{context}\nDraft Description:\n{current_description}\n\nReturn only the improved description text, no preamble."
     else:
-        prompt = f"As a requirements engineer, write a brief, professional description for a software requirement with the title: '{title}'.\n Return only the description text, no preamble."
+        prompt = f"As a requirements engineer, write a brief, professional description for a software requirement with the title: '{title}'.\n{context}\nReturn only the description text, no preamble."
     async for chunk in _ollama_generate(prompt, model):
         yield chunk
 
-async def generate_rationale(title: str, description: str, current_rationale: str = None, model: str = None):
+async def generate_rationale(title: str, description: str, current_rationale: str = None, model: str = None, project_description: str = None):
+    context = f"Project Context: {project_description}\n" if project_description else ""
     if current_rationale:
-        prompt = f"As a requirements engineer, improve and refine the following draft rationale for a software requirement with the title: '{title}' and description: '{description}'.\n\nDraft Rationale:\n{current_rationale}\n\nFocus on the underlying need, risk, or business/technical value it addresses. Return only the improved rationale text, no preamble."
+        prompt = f"As a requirements engineer, improve and refine the following draft rationale for a software requirement with the title: '{title}' and description: '{description}'.\n{context}\nDraft Rationale:\n{current_rationale}\n\nFocus on the underlying need, risk, or business/technical value it addresses. Return only the improved rationale text, no preamble."
     else:
-        prompt = f"As a requirements engineer, write a concise rationale explaining why the following requirement is necessary. Focus on the underlying need, risk, or business/technical value it addresses. Do not restate the requirement.\nTitle: {title}\nDescription: {description}\nReturn only the rationale text, no preamble."
+        prompt = f"As a requirements engineer, write a concise rationale explaining why the following requirement is necessary. Focus on the underlying need, risk, or business/technical value it addresses. Do not restate the requirement.\n{context}Title: {title}\nDescription: {description}\nReturn only the rationale text, no preamble."
     async for chunk in _ollama_generate(prompt, model):
         yield chunk
 

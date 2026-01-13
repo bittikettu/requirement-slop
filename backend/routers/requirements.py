@@ -47,11 +47,11 @@ def verify_req_ears(req: schemas.EARSVerificationRequest):
 
 @router.post("/generate-description")
 async def generate_req_description(req: schemas.AIDescriptionRequest):
-    return StreamingResponse(ai_service.generate_description(req.title, req.current_description, req.model), media_type="text/plain")
+    return StreamingResponse(ai_service.generate_description(req.title, req.current_description, req.model, req.project_description), media_type="text/plain")
 
 @router.post("/generate-rationale")
 async def generate_req_rationale(req: schemas.AIRationaleRequest):
-    return StreamingResponse(ai_service.generate_rationale(req.title, req.description, req.current_rationale, req.model), media_type="text/plain")
+    return StreamingResponse(ai_service.generate_rationale(req.title, req.description, req.current_rationale, req.model, req.project_description), media_type="text/plain")
 
 @router.post("/", response_model=schemas.RequirementOut)
 def create_requirement(req: schemas.RequirementCreate, db: Session = Depends(database.get_db)):

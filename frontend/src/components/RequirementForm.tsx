@@ -104,6 +104,9 @@ export default function RequirementForm() {
         
         try {
             const model = localStorage.getItem('selectedModel') || undefined;
+            const project = projects.find(p => p.id.toString() === selectedProject);
+            const projectDescription = project?.description;
+
             await streamAIDescription(
                 form.title,
                 (chunk) => {
@@ -113,7 +116,8 @@ export default function RequirementForm() {
                 form.description,
                 (thinkingChunk) => {
                     setThinkingContent(prev => prev + thinkingChunk);
-                }
+                },
+                projectDescription
             );
             setThinkingComplete(true);
         } catch (err: unknown) {
@@ -136,6 +140,9 @@ export default function RequirementForm() {
         
         try {
             const model = localStorage.getItem('selectedModel') || undefined;
+            const project = projects.find(p => p.id.toString() === selectedProject);
+            const projectDescription = project?.description;
+            
             await streamAIRationale(
                 form.title,
                 form.description,
@@ -146,7 +153,8 @@ export default function RequirementForm() {
                 form.rationale,
                 (thinkingChunk) => {
                     setThinkingContent(prev => prev + thinkingChunk);
-                }
+                },
+                projectDescription
             );
             setThinkingComplete(true);
         } catch (err: unknown) {

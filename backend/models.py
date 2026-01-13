@@ -10,6 +10,7 @@ class Project(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True)
     prefix = Column(String, unique=True, index=True) # e.g. "KAS-REQ-"
+    description = Column(String, nullable=True)
     next_number = Column(Integer, default=1)
     
     requirements = relationship("Requirement", back_populates="project")

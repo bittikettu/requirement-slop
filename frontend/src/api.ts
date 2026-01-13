@@ -32,6 +32,7 @@ export interface Project {
     id: number;
     name: string;
     prefix: string;
+    description?: string;
     next_number: number;
 }
 
@@ -77,7 +78,7 @@ export const getProjects = async (): Promise<Project[]> => {
     return response.data;
 };
 
-export const createProject = async (project: { name: string; prefix: string; }): Promise<Project> => {
+export const createProject = async (project: { name: string; prefix: string; description?: string; }): Promise<Project> => {
     const response = await api.post<Project>("/projects/", project);
     return response.data;
 };
@@ -148,13 +149,14 @@ export const streamAIDescription = async (
     onResponseChunk: (chunk: string) => void, 
     model?: string, 
     currentDescription?: string,
-    onThinkingChunk?: (chunk: string) => void
+    onThinkingChunk?: (chunk: string) => void,
+    projectDescription?: string
 ) => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
     const response = await fetch(`${baseUrl}/requirements/generate-description`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, model, current_description: currentDescription })
+        body: JSON.stringify({ title, model, current_description: currentDescription, project_description: projectDescription })
     });
     
     if (!response.ok) {
@@ -263,13 +265,14 @@ export const streamAIRationale = async (
     onResponseChunk: (chunk: string) => void, 
     model?: string, 
     currentRationale?: string,
-    onThinkingChunk?: (chunk: string) => void
+    onThinkingChunk?: (chunk: string) => void,
+    projectDescription?: string
 ) => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
     const response = await fetch(`${baseUrl}/requirements/generate-rationale`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description, model, current_rationale: currentRationale })
+        body: JSON.stringify({ title, description, model, current_rationale: currentRationale, project_description: projectDescription })
     });
     
     if (!response.ok) {

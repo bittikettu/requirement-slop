@@ -11,6 +11,7 @@ class RequirementStatus(str, Enum):
 class ProjectBase(BaseModel):
     name: str
     prefix: str
+    description: Optional[str] = None
 
 class ProjectCreate(ProjectBase):
     pass
@@ -95,12 +96,14 @@ class AIDescriptionRequest(BaseModel):
     title: str
     model: Optional[str] = None
     current_description: Optional[str] = None
+    project_description: Optional[str] = None
 
 class AIRationaleRequest(BaseModel):
     title: str
     description: str
     model: Optional[str] = None
     current_rationale: Optional[str] = None
+    project_description: Optional[str] = None
 
 class AIGenerationResponse(BaseModel):
     generated_text: str
