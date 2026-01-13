@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { createRequirement, getProjects, verifyEARS, streamAIDescription, streamAIRationale } from '../api';
 import type { Requirement, Project, EARSResponse } from '../api';
 import { Save, CheckCircle, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
+import ClippyPanel from './ClippyPanel';
 
 export default function RequirementForm() {
     const navigate = useNavigate();
@@ -24,6 +25,8 @@ export default function RequirementForm() {
     const [earsResult, setEarsResult] = useState<EARSResponse | null>(null);
     const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
     const [isGeneratingRat, setIsGeneratingRat] = useState(false);
+    const [thinkingContent, setThinkingContent] = useState("");
+    const [thinkingComplete, setThinkingComplete] = useState(false);
 
     useEffect(() => {
         getProjects().then(data => {
@@ -96,11 +99,23 @@ export default function RequirementForm() {
         setIsGeneratingDesc(true);
         setError("");
         setForm(prev => ({ ...prev, description: "" }));
+        setThinkingContent("");
+        setThinkingComplete(false);
+        
         try {
             const model = localStorage.getItem('selectedModel') || undefined;
-            await streamAIDescription(form.title, (chunk) => {
-                setForm(prev => ({ ...prev, description: (prev.description || "") + chunk }));
-            }, model, form.description);
+            await streamAIDescription(
+                form.title,
+                (chunk) => {
+                    setForm(prev => ({ ...prev, description: (prev.description || "") + chunk }));
+                },
+                model,
+                form.description,
+                (thinkingChunk) => {
+                    setThinkingContent(prev => prev + thinkingChunk);
+                }
+            );
+            setThinkingComplete(true);
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Failed to generate description");
         } finally {
@@ -116,11 +131,24 @@ export default function RequirementForm() {
         setIsGeneratingRat(true);
         setError("");
         setForm(prev => ({ ...prev, rationale: "" }));
+        setThinkingContent("");
+        setThinkingComplete(false);
+        
         try {
             const model = localStorage.getItem('selectedModel') || undefined;
-            await streamAIRationale(form.title, form.description, (chunk) => {
-                setForm(prev => ({ ...prev, rationale: (prev.rationale || "") + chunk }));
-            }, model, form.rationale);
+            await streamAIRationale(
+                form.title,
+                form.description,
+                (chunk) => {
+                    setForm(prev => ({ ...prev, rationale: (prev.rationale || "") + chunk }));
+                },
+                model,
+                form.rationale,
+                (thinkingChunk) => {
+                    setThinkingContent(prev => prev + thinkingChunk);
+                }
+            );
+            setThinkingComplete(true);
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Failed to generate rationale");
         } finally {
@@ -128,8 +156,10 @@ export default function RequirementForm() {
         }
     };
 
+
     return (
         <div className="main-content">
+            <div className={thinkingContent ? "form-with-thinking" : ""}>
             <div className="req-detail-card">
                  <h1 style={{marginBottom:'1rem'}}>New Requirement</h1>
                  
@@ -202,7 +232,7 @@ export default function RequirementForm() {
                             onClick={handleGenerateDescription}
                             disabled={isGeneratingDesc || !form.title}
                         >
-                            {isGeneratingDesc ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                            {isGeneratingDesc ? <Loader2 size={12} className="spin-icon" /> : <Sparkles size={12} />}
                             AI Generate
                         </button>
                     </div>
@@ -218,11 +248,11 @@ export default function RequirementForm() {
                             onClick={handleGenerateRationale}
                             disabled={isGeneratingRat || !form.title || !form.description}
                         >
-                            {isGeneratingRat ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                            {isGeneratingRat ? <Loader2 size={12} className="spin-icon" /> : <Sparkles size={12} />}
                             AI Generate
                         </button>
                     </div>
-                    <textarea rows={2} value={form.rationale} onChange={e => setForm({...form, rationale: e.target.value})} />
+                    <textarea rows={3} value={form.rationale} onChange={e => setForm({...form, rationale: e.target.value})} />
                 </div>
                 
                 <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem'}}>
@@ -242,6 +272,13 @@ export default function RequirementForm() {
                 </div>
 
                 <button className="btn btn-primary" onClick={handleSave}><Save size={16}/> Create</button>
+            </div>
+            
+            <ClippyPanel 
+                thinkingContent={thinkingContent}
+                isVisible={!!thinkingContent}
+                isComplete={thinkingComplete}
+            />
             </div>
         </div>
     );

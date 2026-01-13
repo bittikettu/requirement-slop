@@ -425,3 +425,145 @@ select:focus {
 .asciidoc-rendered-view ul {
   padding-left: 1.5rem;
 }
+
+/* Clippy & Thinking Panel */
+.form-with-thinking {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 1.5rem;
+    max-width: 1400px;
+    align-items: start;
+}
+
+.clippy-container {
+    position: sticky;
+    top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* The Character */
+.clippy-character {
+    width: 60px;
+    height: 60px;
+    position: absolute;
+    bottom: -70px;
+    right: 20px;
+    z-index: 10;
+    /* Simplistic CSS Paperclip representation - replace with SVG for better result if needed */
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M30 20 A10 10 0 0 1 50 20 V70 A20 20 0 0 0 90 70 V20" fill="none" stroke="%23C0C0C0" stroke-width="8" stroke-linecap="round"/><path d="M30 20 V70 A10 10 0 0 0 50 70" fill="none" stroke="%23C0C0C0" stroke-width="8" stroke-linecap="round"/><circle cx="45" cy="40" r="5" fill="black"/><circle cx="75" cy="40" r="5" fill="black"/><path d="M45 30 Q60 55 75 30" fill="none" stroke="black" stroke-width="2"/></svg>') no-repeat center/contain;
+    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+    animation: bounce 2s infinite ease-in-out;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* Speech Bubble */
+.speech-bubble-wrapper {
+    width: 100%;
+    margin-bottom: 80px; /* Space for clippy below */
+}
+
+.speech-bubble {
+    background: #ffffe1;
+    color: #000;
+    border: 1px solid #000;
+    border-radius: 8px;
+    padding: 1rem;
+    position: relative;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+    font-family: "Comic Sans MS", "Chalkboard SE", sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    right: 30px;
+    border-width: 10px 10px 0;
+    border-style: solid;
+    border-color: #000 transparent transparent transparent;
+}
+.speech-bubble::before {
+    content: '';
+    position: absolute;
+    bottom: -7px;
+    right: 31px;
+    border-width: 9px 9px 0;
+    border-style: solid;
+    border-color: #ffffe1 transparent transparent transparent;
+    z-index: 1;
+}
+
+.speech-content strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #000080;
+    border-bottom: 1px dotted #ccc;
+    padding-bottom: 2px;
+}
+
+.thinking-text {
+    font-size: 0.85rem;
+}
+
+.cursor-blink {
+    animation: blink 1s step-end infinite;
+    font-weight: bold;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+/* Scrollbar for bubble */
+.speech-bubble::-webkit-scrollbar {
+    width: 8px;
+}
+.speech-bubble::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+.speech-bubble::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+    border: 2px solid #f1f1f1;
+}
+
+/* Media Queries */
+@media (max-width: 1000px) {
+    .form-with-thinking {
+        grid-template-columns: 1fr;
+    }
+    .clippy-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 300px;
+        z-index: 1000;
+        top: auto;
+    }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spin-icon {
+    animation: spin 1s linear infinite;
+}
